@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1046793008138",
+    "firebase_url": "https://btec-e4bef.firebaseio.com",
+    "project_id": "btec-e4bef",
+    "storage_bucket": "btec-e4bef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1046793008138:android:1d58aec0355a656a",
+        "android_client_info": {
+          "package_name": "com.example.btec_security"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1046793008138-ah55gu5acsi7fbghe5mu8avt3d0lfu3c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.btec_security",
+            "certificate_hash": "b6b2fff2403f2daf4c2e11749ff5b007d69201d2"
+          }
+        },
+        {
+          "client_id": "1046793008138-17pttj7cf3fe4rjn6tk7r4klasjneb00.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGwi_sCeB7Woq0M6gOBNI3wDqUiYyKURQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1046793008138-17pttj7cf3fe4rjn6tk7r4klasjneb00.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

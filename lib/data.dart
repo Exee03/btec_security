@@ -1,4 +1,4 @@
-import 'package:btec_security/utils/CustomColors.dart';
+import 'package:btec_security/utils/custom_colors.dart';
 import 'package:flutter/material.dart';
 
 class Menu {
