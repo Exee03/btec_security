@@ -1,6 +1,7 @@
 import 'package:btec_security/app_state_container.dart';
 import 'package:btec_security/models/app_state.dart';
 import 'package:btec_security/screens/auth_screen.dart';
+import 'package:btec_security/ui/widgets/dialog/unauthorised_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:btec_security/utils/custom_colors.dart';
@@ -18,12 +19,12 @@ class _HomeScreenState extends State<HomeScreen> {
   List menu;
 
   Widget get _pageToDisplay {
-    print('_pageToDisplay');
     if (appState.isLoading) {
       return _loadingView;
     } else if (!appState.isLoading && appState.user == null) {
-      print('!appState.isLoading && appState.user == null');
       return new AuthScreen();
+    } else if (!appState.authorized) {
+      return new Unauthorised(email: appState.user.email);
     } else {
       return _homeView;
     }
@@ -197,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 new Text(
-                  'Sign in With Google',
+                  'Sign Out',
                   textAlign: TextAlign.center,
                   style: new TextStyle(
                     fontSize: 16.0,

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:btec_security/ui/widgets/dialog/unauthorised_user.dart';
+import 'package:btec_security/utils/dialog_page_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:btec_security/models/app_state.dart';
@@ -40,7 +42,8 @@ class _AppStateContainerState extends State<AppStateContainer> {
   // This class handles signing into Google.
   // It comes from the Firebase plugin.
   final googleSignIn = new GoogleSignIn(); // new
-  
+
+  bool authorized;
 
   FirebaseUser firebaseUser;
   FirebaseAuth _auth = FirebaseAuth.instance;
@@ -60,7 +63,6 @@ class _AppStateContainerState extends State<AppStateContainer> {
     }
   }
 
-
   // All new:
   // This method is called on start up no matter what.
   Future<Null> initUser() async {
@@ -74,8 +76,8 @@ class _AppStateContainerState extends State<AppStateContainer> {
         state.isLoading = false;
       });
     } else {
-      // Do some other stuff, handle later. 
-      firebaseUser = await logIntoFirebase();  
+      // Do some other stuff, handle later.
+      firebaseUser = await logIntoFirebase();
     }
   }
 
@@ -92,16 +94,41 @@ class _AppStateContainerState extends State<AppStateContainer> {
       );
 
       firebaseUser = await _auth.signInWithCredential(credential);
-      updateUserData(firebaseUser);
+
       print('Logged in: ${firebaseUser.displayName}');
-      setState(() {
-        state.isLoading = false;
-        state.user = firebaseUser;
-      });
+      await checkData(firebaseUser);
+      if (authorized == false) {
+        setState(() {
+          state.isLoading = false;
+          state.authorized = false;
+          state.user = firebaseUser;
+        });
+        
+      } else {
+        updateUserData(firebaseUser);
+        setState(() {
+          state.isLoading = false;
+          state.authorized = true;
+          state.user = firebaseUser;
+        });
+      }
     } catch (error) {
       print(error);
       return null;
     }
+  }
+
+  checkData(FirebaseUser user) async {
+    await Firestore.instance
+        .collection('admin')
+        .where('email', isEqualTo: user.email)
+        .getDocuments()
+        .then((onValue) {
+      if (onValue.documents.isEmpty) {
+        print('--------------------------------------no data');
+        authorized = false;
+      }
+    });
   }
 
   void updateUserData(FirebaseUser user) async {

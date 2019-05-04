@@ -1,4 +1,5 @@
 import 'package:btec_security/app_state_container.dart';
+import 'package:btec_security/models/app_state.dart';
 import 'package:flutter/material.dart';
 
 class AuthScreen extends StatefulWidget {
