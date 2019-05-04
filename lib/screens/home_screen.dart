@@ -165,12 +165,9 @@ class _HomeScreenState extends State<HomeScreen> {
     await _auth.signOut();
     final String uid = appState.user.uid;
     print(uid + ' has successfully signed out.');
-    print(appState.isLoading);
     setState(() {
       appState.isLoading = false;
-      print(appState.isLoading);
       appState.user = null;
-      print(appState.user);
     });       
   }
 

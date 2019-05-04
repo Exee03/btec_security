@@ -125,7 +125,6 @@ class _AppStateContainerState extends State<AppStateContainer> {
         .getDocuments()
         .then((onValue) {
       if (onValue.documents.isEmpty) {
-        print('--------------------------------------no data');
         authorized = false;
       }
     });
