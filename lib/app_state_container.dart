@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:btec_security/models/app_state.dart';
 import 'package:flutter/foundation.dart';
@@ -39,9 +40,10 @@ class _AppStateContainerState extends State<AppStateContainer> {
   // This class handles signing into Google.
   // It comes from the Firebase plugin.
   final googleSignIn = new GoogleSignIn(); // new
+  
 
-  // FirebaseUser firebaseUser;
-  // FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseUser firebaseUser;
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -73,7 +75,7 @@ class _AppStateContainerState extends State<AppStateContainer> {
       });
     } else {
       // Do some other stuff, handle later. 
-      var firebaseUser = await logIntoFirebase();  
+      firebaseUser = await logIntoFirebase();  
     }
   }
 
@@ -82,8 +84,6 @@ class _AppStateContainerState extends State<AppStateContainer> {
       googleUser = await googleSignIn.signIn();
     }
 
-    FirebaseUser firebaseUser;
-    FirebaseAuth _auth = FirebaseAuth.instance;
     try {
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.getCredential(
@@ -92,6 +92,7 @@ class _AppStateContainerState extends State<AppStateContainer> {
       );
 
       firebaseUser = await _auth.signInWithCredential(credential);
+      updateUserData(firebaseUser);
       print('Logged in: ${firebaseUser.displayName}');
       setState(() {
         state.isLoading = false;
@@ -101,6 +102,19 @@ class _AppStateContainerState extends State<AppStateContainer> {
       print(error);
       return null;
     }
+  }
+
+  void updateUserData(FirebaseUser user) async {
+    final Firestore _db = Firestore.instance;
+    DocumentReference ref = _db.collection('users').document(user.uid);
+    return ref.setData({
+      'uid': user.uid,
+      'provider': user.providerData[1].providerId,
+      'email': user.email,
+      'displayName': user.displayName,
+      'photoURL': user.photoUrl,
+      'lastSeen': DateTime.now()
+    }, merge: true);
   }
 
   Future<dynamic> _ensureLoggedInOnStartUp() async {
