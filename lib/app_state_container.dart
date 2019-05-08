@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'package:btec_security/ui/widgets/dialog/unauthorised_user.dart';
-import 'package:btec_security/utils/dialog_page_route.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:btec_security/models/app_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class AppStateContainer extends StatefulWidget {
   // Your apps state is managed by the container
@@ -103,7 +103,6 @@ class _AppStateContainerState extends State<AppStateContainer> {
           state.authorized = false;
           state.user = firebaseUser;
         });
-        
       } else {
         updateUserData(firebaseUser);
         setState(() {
@@ -132,6 +131,8 @@ class _AppStateContainerState extends State<AppStateContainer> {
 
   void updateUserData(FirebaseUser user) async {
     final Firestore _db = Firestore.instance;
+    final FirebaseMessaging _messaging = FirebaseMessaging();
+    final String token = await _messaging.getToken();
     DocumentReference ref = _db.collection('users').document(user.uid);
     return ref.setData({
       'uid': user.uid,
@@ -139,6 +140,7 @@ class _AppStateContainerState extends State<AppStateContainer> {
       'email': user.email,
       'displayName': user.displayName,
       'photoURL': user.photoUrl,
+      'token': token,
       'lastSeen': DateTime.now()
     }, merge: true);
   }
