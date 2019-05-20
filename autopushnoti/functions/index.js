@@ -41,6 +41,11 @@ exports.statusDatabaseTrigger = functions.database.ref(
                         'body': 'An unknown person attempts to enter your office ( ' + msgData.name + ' )',
                         'sound': 'loudalarm.mp3'
                     },
+                    'data':{
+                        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                        'title': 'Status : ' + msgData.status,
+                        'body': 'An unknown person attempts to enter your office ( ' + msgData.name + ' )',
+                    }
                 }
 
                 var options = {
@@ -61,4 +66,5 @@ exports.statusDatabaseTrigger = functions.database.ref(
         console.log("Status : " + msgData.status);
         return null;
     }
+    return null;
 })
