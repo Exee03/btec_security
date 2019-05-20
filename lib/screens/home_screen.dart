@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
           left: 12.0, right: 12.0, top: 30.0, bottom: 8.0),
       child: Container(
         color: CustomColors.front,
-        height: MediaQuery.of(context).size.height / 4,
+        height: MediaQuery.of(context).size.height / 3,
         child: Column(
           children: <Widget>[
             Row(
@@ -151,11 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
               children: <Widget>[
                 Text(
                   'BTeC',
-                  style: TextStyle(color: Colors.orange, fontSize: 50.0),
+                  style: TextStyle(
+                      color: Colors.orange, fontSize: 50.0),
                 ),
                 Text(
                   'Security',
-                  style: TextStyle(color: Colors.white, fontSize: 25.0),
+                  style: TextStyle(color: Colors.white, fontSize: 25.0,fontStyle: FontStyle.italic),
                 ),
               ],
             ),
