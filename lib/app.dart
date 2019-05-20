@@ -12,7 +12,8 @@ class _AppRootWidgetState extends State<AppRootWidget> {
   ThemeData get _themeData => new ThemeData(
     primaryColor: Colors.orange,
     accentColor: Colors.amberAccent,
-    scaffoldBackgroundColor: CustomColors.background
+    scaffoldBackgroundColor: CustomColors.background,
+    fontFamily: 'Open_Sans'
   );
 
   @override
