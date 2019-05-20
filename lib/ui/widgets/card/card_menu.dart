@@ -32,17 +32,17 @@ class MenuCard extends StatelessWidget {
                         if (index == 0) {
                           return Opacity(
                             opacity: animation.value,
-                            child: OfficeScreen(),
+                            child: OfficeScreen(menu: menu),
                           );
                         } else if (index == 1) {
                           return Opacity(
                             opacity: animation.value,
-                            child: AttendanceScreen(),
+                            child: AttendanceScreen(menu: menu),
                           );
                         } else if (index == 2) {
                           return Opacity(
                             opacity: animation.value,
-                            child: HistoryScreen(),
+                            child: HistoryScreen(menu: menu),
                           );
                         }
                       },
