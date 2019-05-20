@@ -1,8 +1,10 @@
 import 'package:btec_security/app_state_container.dart';
 import 'package:btec_security/models/app_state.dart';
+import 'package:btec_security/models/message.dart';
 import 'package:btec_security/screens/auth_screen.dart';
 import 'package:btec_security/ui/widgets/dialog/unauthorised_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:btec_security/utils/custom_colors.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -17,6 +19,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   AppState appState;
   List menu;
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final List<Message> messages = [];
 
   Widget get _pageToDisplay {
     if (appState.isLoading) {
@@ -42,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: <Widget>[
           header(),
           cardMenu(),
+          messageCard(),
           logoutButton(),
         ],
       ),
@@ -52,6 +58,42 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     menu = getMenu();
     super.initState();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('onMessage: $message');
+        final notification = message['notification'];
+        setState(() {
+          messages.add(Message(
+              title: notification['title'], body: notification['body']));
+        });
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('onLaunch: $message');
+        setState(() {
+          messages.add(Message(
+            title: 'onLaunch',
+            body: '$message',
+          ));
+        });
+        final notification = message['data'];
+        setState(() {
+          messages.add(Message(
+              title: 'onLaunch : ${notification['title']}',
+              body: 'onLaunch : ${notification['body']}'));
+        });
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('onResume: $message');
+        final notification = message['data'];
+        setState(() {
+          messages.add(Message(
+              title: 'onResume : ${notification['title']}',
+              body: 'onResume : ${notification['body']}'));
+        });
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
   }
 
   @override
@@ -168,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       appState.isLoading = false;
       appState.user = null;
-    });       
+    });
   }
 
   Padding logoutButton() {
@@ -204,6 +246,29 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Padding messageCard() {
+    Widget buildMessage(Message message) => ListTile(
+          title: Text(
+            message.title,
+            style: TextStyle(color: Colors.white),
+          ),
+          subtitle: Text(
+            message.body,
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+    return Padding(
+      padding: EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0, bottom: 8.0),
+      child: Container(
+        color: CustomColors.front,
+        height: MediaQuery.of(context).size.height / 2,
+        child: ListView(
+          children: messages.map(buildMessage).toList(),
         ),
       ),
     );
