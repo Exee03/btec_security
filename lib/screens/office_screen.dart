@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:btec_security/data.dart';
 import 'package:btec_security/ui/widgets/chart/attendance_chart.dart';
 import 'package:btec_security/utils/custom_colors.dart';
@@ -25,7 +23,6 @@ class OfficeScreen extends StatefulWidget {
 class _OfficeScreenState extends State<OfficeScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     cardData.clear();
     loadData();
@@ -69,31 +66,34 @@ class _OfficeScreenState extends State<OfficeScreen> {
               child: Column(
                 children: <Widget>[
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: Text(
+                          cardData.tiltle,
+                          style: TextStyle(fontSize: 25, color: Colors.white),
+                        ),
+                      ),
                       Container(
                         width: 100,
                         height: 100,
                         child: cardData.icon,
                       ),
-                      Text(
-                        cardData.tiltle,
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      ),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0, bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[],
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 10.0, bottom: 10),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.start,
+                  //     children: <Widget>[],
+                  //   ),
+                  // ),
                   SizedBox(
                     height: 1,
                     width: MediaQuery.of(context).size.width - 50,
-                    child: Container(color: Colors.white),
+                    child: Container(color: widget.menu.colors),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -105,8 +105,8 @@ class _OfficeScreenState extends State<OfficeScreen> {
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
-                                color: Colors.white)),
-                        Icon(Icons.arrow_right, color: Colors.white)
+                                color: widget.menu.colors)),
+                        Icon(Icons.arrow_right, color: widget.menu.colors)
                       ],
                     ),
                   ),
