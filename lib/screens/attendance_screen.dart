@@ -23,7 +23,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       appBar: AppBar(
         backgroundColor: widget.menu.colors,
         centerTitle: true,
-        title: Text(widget.menu.title, style: CustomFonts.appBar,),
+        title: Text(
+          widget.menu.title,
+          style: CustomFonts.appBar,
+        ),
         elevation: 0,
       ),
       body: Column(
@@ -36,7 +39,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 30.0, vertical: 10),
                   child: Container(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,18 +62,31 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     ),
                   ),
                 ),
-                Container(
-                  width: 150,
-                  child: AttendanceChart(),
+                Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: new BoxDecoration(
+                      color: Colors.white12,
+                      shape: BoxShape.circle,
+                    ),
+                    child: AttendanceChart(),
+                  ),
                 )
               ],
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
               color: CustomColors.front,
-              child: AttendanceTable(),
+              child: Container(
+                child: AttendanceTable(),
+              ),
             ),
           )
         ],
