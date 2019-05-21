@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:btec_security/utils/custom_colors.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:btec_security/data.dart';
 import 'package:btec_security/ui/widgets/card/card_menu.dart';
@@ -16,9 +17,13 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   AppState appState;
   List menu;
+  bool isCollapsed = true;
+  double screenWidth, screenHeight;
+  final Duration durationAnimation = const Duration(milliseconds: 300);
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   final List<Message> messages = [];
@@ -42,14 +47,62 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget get _homeView {
-    return new SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          header(),
-          cardMenu(),
-          messageCard(),
-          logoutButton(),
-        ],
+    return Stack(
+      children: <Widget>[sideMenu(context), homePage(context)],
+    );
+  }
+
+  Widget homePage(context) {
+    return AnimatedPositioned(
+      duration: durationAnimation,
+      top: isCollapsed ? 0 : 0.05 * screenHeight,
+      bottom: isCollapsed ? 0 : 0.05 * screenHeight,
+      left: isCollapsed ? 0 : 0.6 * screenWidth,
+      right: isCollapsed ? 0 : -0.2 * screenWidth,
+      child: Material(
+        shadowColor: Colors.grey,
+        animationDuration: durationAnimation,
+        elevation: 8,
+        color: CustomColors.background,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          physics: ClampingScrollPhysics(),
+          child: Column(
+            children: <Widget>[
+              header(),
+              cardMenu(),
+              messageCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget sideMenu(context) {
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 18.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            InkWell(
+              onTap: () {
+                setState(() {
+                  isCollapsed = true;
+                });
+              },
+              child: Text(
+                'Dashboard',
+                style: TextStyle(fontSize: 20, color: Colors.white),
+              ),
+            ),
+            logoutButton(),
+          ],
+        ),
       ),
     );
   }
@@ -98,6 +151,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    screenHeight = size.height;
+    screenWidth = size.width;
+
     // This is the InheritedWidget in action.
     // You can reference the StatefulWidget that
     // wraps it like this, which allows you to access any
@@ -118,47 +175,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Padding header() {
     return Padding(
-      padding: const EdgeInsets.only(
-          left: 12.0, right: 12.0, top: 30.0, bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Container(
         color: CustomColors.front,
         height: MediaQuery.of(context).size.height / 3,
         child: Column(
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(
-                    Icons.menu,
-                    color: Colors.white,
+            Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isCollapsed = !isCollapsed;
+                      });
+                    },
                   ),
-                  onPressed: null,
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.search,
-                    color: Colors.white,
+                  IconButton(
+                    icon: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    ),
+                    onPressed: null,
                   ),
-                  onPressed: null,
-                ),
-              ],
+                ],
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  'BTeC',
-                  style: TextStyle(
-                      color: Colors.orange, fontSize: 50.0),
-                ),
-                Text(
-                  'Security',
-                  style: TextStyle(color: Colors.white, fontSize: 25.0,fontStyle: FontStyle.italic),
-                ),
-              ],
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    'BTeC',
+                    style: TextStyle(color: Colors.orange, fontSize: 50.0),
+                  ),
+                  Text(
+                    'Security',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25.0,
+                        fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -186,10 +253,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Padding cardMenu() {
     return Padding(
-      padding: EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0, bottom: 8.0),
+      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
       child: Container(
         color: CustomColors.front,
-        height: MediaQuery.of(context).size.height / 2,
+        width: screenWidth,
+        height: screenHeight / 2,
         child: Swiper(
           scrollDirection: Axis.horizontal,
           itemCount: menu.length,
@@ -204,6 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future logOuttoFirebase() async {
+    print('attent to logout');
     FirebaseAuth _auth = FirebaseAuth.instance;
     await _auth.signOut();
     final String uid = appState.user.uid;
@@ -216,36 +285,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Padding logoutButton() {
     return Padding(
-      padding: EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0, bottom: 8.0),
-      child: Container(
-        color: CustomColors.front,
-        height: 50,
-        child: RaisedButton(
-          onPressed: () => logOuttoFirebase(),
-          color: Colors.white,
-          child: new Container(
-            width: 230.0,
-            height: 50.0,
-            alignment: Alignment.center,
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                new Padding(
-                  padding: const EdgeInsets.only(right: 20.0),
-                  child: new Image.network(
-                    'https://image.flaticon.com/teams/slug/google.jpg',
-                    width: 30.0,
-                  ),
+      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+      child: InkWell(
+        onTap: () => logOuttoFirebase(),
+        child: new Container(
+          width: 150.0,
+          height: 50.0,
+          child: new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              new Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: Icon(
+                  Icons.exit_to_app,
+                  color: Colors.white,
                 ),
-                new Text(
-                  'Sign Out',
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(
-                    fontSize: 16.0,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              new Text(
+                'Sign Out',
+                textAlign: TextAlign.center,
+                style: new TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+            ],
           ),
         ),
       ),
@@ -264,13 +325,27 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
     return Padding(
-      padding: EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0, bottom: 8.0),
-      child: Container(
-        color: CustomColors.front,
-        height: MediaQuery.of(context).size.height / 2,
-        child: ListView(
-          children: messages.map(buildMessage).toList(),
-        ),
+      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+      child: Stack(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20.0),
+              child: Container(
+                color: CustomColors.front,
+                height: MediaQuery.of(context).size.height / 2,
+                child: ListView(
+                  children: messages.map(buildMessage).toList(),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.transparent,
+            height: MediaQuery.of(context).size.height / 2,
+          )
+        ],
       ),
     );
   }
