@@ -59,42 +59,45 @@ class MenuCard extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    end: Alignment.topCenter,
-                    begin: Alignment.bottomCenter,
-                    stops: [0.1, 0.9],
-                    colors: [
-                      menu.colors,
-                      Colors.white10,
-                    ],
+              child: Container(
+                width: 200,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      end: Alignment.topCenter,
+                      begin: Alignment.bottomCenter,
+                      stops: [0.1, 0.9],
+                      colors: [
+                        menu.colors,
+                        Colors.white10,
+                      ],
+                    ),
                   ),
-                ),
-                child: Align(
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Container(
-                            height: 100,
-                            width: 100,
-                            child: Image(
-                              image: menu.image,
-                              color: Colors.white,
-                              fit: BoxFit.fitHeight,
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Container(
+                              height: 100,
+                              width: 100,
+                              child: Image(
+                                image: menu.image,
+                                color: Colors.white,
+                                fit: BoxFit.fitHeight,
+                              ),
                             ),
                           ),
-                        ),
-                        Text(
-                          menu.title,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 30, color: Colors.white),
-                        ),
-                      ],
-                    )),
+                          Text(
+                            menu.title,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 30, color: Colors.white),
+                          ),
+                        ],
+                      )),
+                ),
               ),
             ),
           ),
