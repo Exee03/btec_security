@@ -17,7 +17,7 @@ exports.statusDatabaseTrigger = functions.database.ref(
     }
 
     if (msgData.status == 'Detected!') {
-        admin.firestore().collection('users').get().then((snapshots) => {
+        admin.firestore().collection('users').where("uid", "==", msgData.uid).get().then((snapshots) => {
             var tokens = [];
             console.log("Check Firestore");
             if (snapshots.empty) {
@@ -26,6 +26,9 @@ exports.statusDatabaseTrigger = functions.database.ref(
             } else {
                 console.log("Get User");
                 for (var user of snapshots.docs) {
+                    console.log('db        : ' + msgData.uid);
+                    console.log('Firestore : ' + user.data().uid);
+
                     if (user.data().uid == msgData.uid) {
                         tokens.push(user.data().token);
                         console.log("Get Token");
@@ -36,12 +39,12 @@ exports.statusDatabaseTrigger = functions.database.ref(
                 }
 
                 var payload = {
-                    'notification': {
-                        'title': 'Status : ' + msgData.status,
-                        'body': 'An unknown person attempts to enter your office ( ' + msgData.name + ' )',
-                        'sound': 'loudalarm.mp3'
+                    notification: {
+                        title: 'Status : ' + msgData.status,
+                        body: 'An unknown person attempts to enter your office ( ' + msgData.name + ' )',
+                        sound: 'loudalarm.mp3'
                     },
-                    'data':{
+                    data: {
                         'click_action': 'FLUTTER_NOTIFICATION_CLICK',
                         'title': 'Status : ' + msgData.status,
                         'body': 'An unknown person attempts to enter your office ( ' + msgData.name + ' )',
