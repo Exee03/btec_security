@@ -7,45 +7,46 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CustomColors.splashBackground,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+      body: Stack(
+        fit: StackFit.expand,
         children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Hero(
-                    tag: 'appTitle',
-                    child: Container(
-                      height: 100,
-                      width: 100,
-                      color: Colors.transparent,
-                      child: Image.asset('assets/icons/app_logo.png'),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                CircularProgressIndicator(),
-                Padding(
-                  padding: EdgeInsets.only(top: 20.0),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                flex: 2,
+                child: Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        color: Colors.white,
+                        width: 250,
+                        child: Image.asset('assets/icons/app_logo.png'),
+                      ),
+                    ],
+                  ),
                 ),
-                Text(
-                  "UiTM",
-                  softWrap: true,
-                  textAlign: TextAlign.center,
-                  style: CustomFonts.appBar,
-                )
-              ],
-            ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    Padding(
+                      padding: EdgeInsets.only(top: 20.0),
+                    ),
+                    Text(
+                      "UiTM",
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                      style: CustomFonts.appBar,
+                    )
+                  ],
+                ),
+              )
+            ],
           )
         ],
       ),
