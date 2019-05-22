@@ -5,21 +5,23 @@ import 'package:btec_security/ui/widgets/card/card_menu.dart';
 import 'package:btec_security/utils/custom_colors.dart';
 import 'package:btec_security/utils/custom_fonts.dart';
 import 'package:date_format/date_format.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String displayName;
+  final FirebaseUser user;
 
-  HomeScreen({Key key, @required this.displayName}) : super(key: key);
+  HomeScreen({Key key, @required this.user}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String displayName;
   List menu;
   final Duration durationAnimation = const Duration(milliseconds: 300);
   double screenWidth, screenHeight;
@@ -31,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    print(widget.displayName);
+    print(widget.user);
     menu = getMenu();
     super.initState();
     _firebaseMessaging.configure(
@@ -75,6 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.user.displayName == null) {
+      displayName = widget.user.email;
+    } else {
+      displayName = widget.user.displayName;
+    }
     Size size = MediaQuery.of(context).size;
     screenHeight = size.height;
     screenWidth = size.width;
@@ -99,8 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              widget.displayName,
-              style: CustomFonts.appBar,
+              displayName,
+              style: CustomFonts.invTextStyle,
             ),
             InkWell(
               onTap: () {
@@ -247,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  widget.displayName,
+                  displayName,
                   style: TextStyle(color: Colors.white30, fontSize: 15.0),
                 ),
               ],

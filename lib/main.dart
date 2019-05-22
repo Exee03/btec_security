@@ -51,7 +51,7 @@ class _AppState extends State<App> {
               return LoginScreen(userRepository: _userRepository);
             }
             if (state is Authenticated) {
-              return HomeScreen(displayName: state.displayName);
+              return HomeScreen(user: state.user);
             }
           },
         ),
