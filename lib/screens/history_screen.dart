@@ -16,14 +16,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: AppBar(
         backgroundColor: widget.menu.colors,
         centerTitle: true,
-        title: Text(widget.menu.title, style: CustomFonts.appBar,),
+        title: Text(
+          widget.menu.title,
+          style: CustomFonts.appBar,
+        ),
         elevation: 0,
       ),
       body: Column(
         children: <Widget>[
           Row(
             children: <Widget>[
-              Text('data', style: TextStyle(color: Colors.white70, fontSize: 20.0)),
+              Text('asdsd',
+                  style: TextStyle(color: Colors.white70, fontSize: 20.0)),
             ],
           )
         ],

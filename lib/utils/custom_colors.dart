@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class CustomColors{
   static Color background = Color.fromRGBO(28, 29, 50, 1);
   static Color bottomBackground = Color.fromRGBO(255, 241, 217, 1);
+  static Color splashBackground = Color.fromRGBO(255, 161, 0, 1);
   static Color front = Color.fromRGBO(47, 48, 69, 1);
   static Color office = Color.fromRGBO(254, 52, 76, 1);
   static Color attendance = Color.fromRGBO(211, 5, 105, 1);

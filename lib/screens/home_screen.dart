@@ -1,53 +1,153 @@
-import 'package:btec_security/app_state_container.dart';
-import 'package:btec_security/models/app_state.dart';
-import 'package:btec_security/models/message.dart';
-import 'package:btec_security/screens/auth_screen.dart';
-import 'package:btec_security/ui/widgets/dialog/unauthorised_user.dart';
-import 'package:date_format/date_format.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:btec_security/utils/custom_colors.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:btec_security/auth/bloc.dart';
 import 'package:btec_security/data.dart';
+import 'package:btec_security/models/message.dart';
 import 'package:btec_security/ui/widgets/card/card_menu.dart';
+import 'package:btec_security/utils/custom_colors.dart';
+import 'package:btec_security/utils/custom_fonts.dart';
+import 'package:date_format/date_format.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({this.messages});
-  List<Message> messages = [];
+  final String displayName;
+
+  HomeScreen({Key key, @required this.displayName}) : super(key: key);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  AppState appState;
+class _HomeScreenState extends State<HomeScreen> {
   List menu;
-  bool isCollapsed = true;
-  double screenWidth, screenHeight;
   final Duration durationAnimation = const Duration(milliseconds: 300);
+  double screenWidth, screenHeight;
+  bool isCollapsed = true;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  List<Message> messages = [];
+  String _time =
+      formatDate(DateTime.now(), [dd, '/', mm, ' - ', h, ':', nn, ' ', am]);
 
-  Widget get _pageToDisplay {
-    if (appState.isLoading) {
-      return _loadingView;
-    } else if (!appState.isLoading && appState.user == null) {
-      return new AuthScreen();
-    } else if (!appState.authorized) {
-      return new Unauthorised(email: appState.user.email);
-    } else {
-      return _homeView;
-    }
+  @override
+  void initState() {
+    print(widget.displayName);
+    menu = getMenu();
+    super.initState();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('onMessage: $message');
+        final notification = message['notification'];
+        setState(() {
+          messages.add(Message(
+              title: notification['title'],
+              body: '$_time\n${notification['body']}'));
+        });
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('onLaunch: $message');
+        setState(() {
+          messages.add(Message(
+            title: 'onLaunch',
+            body: '$message',
+          ));
+        });
+        final notification = message['data'];
+        setState(() {
+          messages.add(Message(
+              title: 'onLaunch : ${notification['title']}',
+              body: 'onLaunch : ${notification['body']}'));
+        });
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('onResume: $message');
+        final notification = message['data'];
+        setState(() {
+          messages.add(Message(
+              title: 'onResume : ${notification['title']}',
+              body: 'onResume : ${notification['body']}'));
+        });
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
   }
 
-  Widget get _loadingView {
-    return new Center(
-      child: new CircularProgressIndicator(),
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    screenHeight = size.height;
+    screenWidth = size.width;
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          sideMenu(context),
+          homePage(context),
+        ],
+      ),
     );
   }
 
-  Widget get _homeView {
-    return Stack(
-      children: <Widget>[sideMenu(context), homePage(context)],
+  Widget sideMenu(context) {
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 18.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              widget.displayName,
+              style: CustomFonts.appBar,
+            ),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  isCollapsed = true;
+                });
+              },
+              child: Text(
+                'Dashboard',
+                style: TextStyle(fontSize: 20, color: Colors.white),
+              ),
+            ),
+            logoutButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Padding logoutButton() {
+    return Padding(
+      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+      child: InkWell(
+        onTap: () =>
+            BlocProvider.of<AuthenticationBloc>(context).dispatch(LoggedOut()),
+        child: new Container(
+          width: 150.0,
+          height: 50.0,
+          child: new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              new Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: Icon(
+                  Icons.exit_to_app,
+                  color: Colors.white,
+                ),
+              ),
+              new Text(
+                'Sign Out',
+                textAlign: TextAlign.center,
+                style: new TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -78,64 +178,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget sideMenu(context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 18.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            InkWell(
-              onTap: () {
-                setState(() {
-                  isCollapsed = true;
-                });
-              },
-              child: Text(
-                'Dashboard',
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-            ),
-            logoutButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    menu = getMenu();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    screenHeight = size.height;
-    screenWidth = size.width;
-
-    // This is the InheritedWidget in action.
-    // You can reference the StatefulWidget that
-    // wraps it like this, which allows you to access any
-    // public method or property on it.
-    var container = AppStateContainer.of(context);
-    // For example, get grab its property called state!
-    appState = container.state;
-    // Everything this build method is called, which is when the state
-    // changes, Flutter will 'get' the _pageToDisplay widget, which will
-    // return the screen we want based on the appState.isLoading
-    Widget body = _pageToDisplay;
-    return new Scaffold(
-      // Replace the hardcoded widget
-      // with our widget that switches.
-      body: body,
-    );
-  }
-
   Padding header() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -145,12 +187,13 @@ class _HomeScreenState extends State<HomeScreen>
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 15.0),
+              padding: const EdgeInsets.only(top: 30.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   IconButton(
+                    iconSize: 30,
                     icon: Icon(
                       Icons.menu,
                       color: Colors.white,
@@ -178,7 +221,8 @@ class _HomeScreenState extends State<HomeScreen>
                 children: <Widget>[
                   Text(
                     'BTeC',
-                    style: TextStyle(color: Colors.orange, fontSize: 50.0),
+                    style: TextStyle(
+                        color: CustomColors.splashBackground, fontSize: 50.0),
                   ),
                   Text(
                     'Security',
@@ -203,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  appState.user.displayName,
+                  widget.displayName,
                   style: TextStyle(color: Colors.white30, fontSize: 15.0),
                 ),
               ],
@@ -234,48 +278,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Future logOuttoFirebase() async {
-    print('attent to logout');
-    FirebaseAuth _auth = FirebaseAuth.instance;
-    await _auth.signOut();
-    final String uid = appState.user.uid;
-    print(uid + ' has successfully signed out.');
-    setState(() {
-      appState.isLoading = false;
-      appState.user = null;
-    });
-  }
-
-  Padding logoutButton() {
-    return Padding(
-      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: InkWell(
-        onTap: () => logOuttoFirebase(),
-        child: new Container(
-          width: 150.0,
-          height: 50.0,
-          child: new Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              new Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: Icon(
-                  Icons.exit_to_app,
-                  color: Colors.white,
-                ),
-              ),
-              new Text(
-                'Sign Out',
-                textAlign: TextAlign.center,
-                style: new TextStyle(fontSize: 16.0, color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Padding messageCard() {
     Widget buildMessage(Message message) => ListTile(
           title: Text(
@@ -299,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen>
                 color: CustomColors.front,
                 height: MediaQuery.of(context).size.height / 2,
                 child: ListView(
-                  children: widget.messages.map(buildMessage).toList(),
+                  children: messages.map(buildMessage).toList(),
                 ),
               ),
             ),

@@ -29,7 +29,6 @@ class _OfficeScreenState extends State<OfficeScreen> {
   }
 
   Future loadData() async {
-    print(cardData.length);
     cardData.add(CardModel(icon: AttendanceChart(), tiltle: 'Attendance'));
     cardData.add(CardModel(
         icon: LayoutBuilder(builder: (context, constraint) {
@@ -47,7 +46,6 @@ class _OfficeScreenState extends State<OfficeScreen> {
                   size: constraint.biggest.height - 35, color: Colors.white));
         }),
         tiltle: 'Todo List'));
-    print(cardData.length);
   }
 
   @override
