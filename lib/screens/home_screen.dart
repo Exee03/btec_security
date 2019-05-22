@@ -3,8 +3,8 @@ import 'package:btec_security/models/app_state.dart';
 import 'package:btec_security/models/message.dart';
 import 'package:btec_security/screens/auth_screen.dart';
 import 'package:btec_security/ui/widgets/dialog/unauthorised_user.dart';
+import 'package:date_format/date_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:btec_security/utils/custom_colors.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +13,8 @@ import 'package:btec_security/data.dart';
 import 'package:btec_security/ui/widgets/card/card_menu.dart';
 
 class HomeScreen extends StatefulWidget {
+  HomeScreen({this.messages});
+  List<Message> messages = [];
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -24,9 +26,6 @@ class _HomeScreenState extends State<HomeScreen>
   bool isCollapsed = true;
   double screenWidth, screenHeight;
   final Duration durationAnimation = const Duration(milliseconds: 300);
-
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  final List<Message> messages = [];
 
   Widget get _pageToDisplay {
     if (appState.isLoading) {
@@ -111,42 +110,6 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     menu = getMenu();
     super.initState();
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print('onMessage: $message');
-        final notification = message['notification'];
-        setState(() {
-          messages.add(Message(
-              title: notification['title'], body: notification['body']));
-        });
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print('onLaunch: $message');
-        setState(() {
-          messages.add(Message(
-            title: 'onLaunch',
-            body: '$message',
-          ));
-        });
-        final notification = message['data'];
-        setState(() {
-          messages.add(Message(
-              title: 'onLaunch : ${notification['title']}',
-              body: 'onLaunch : ${notification['body']}'));
-        });
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print('onResume: $message');
-        final notification = message['data'];
-        setState(() {
-          messages.add(Message(
-              title: 'onResume : ${notification['title']}',
-              body: 'onResume : ${notification['body']}'));
-        });
-      },
-    );
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
   }
 
   @override
@@ -336,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen>
                 color: CustomColors.front,
                 height: MediaQuery.of(context).size.height / 2,
                 child: ListView(
-                  children: messages.map(buildMessage).toList(),
+                  children: widget.messages.map(buildMessage).toList(),
                 ),
               ),
             ),
