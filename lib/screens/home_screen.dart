@@ -286,6 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Padding messageCard() {
+    messages = messages.reversed.toList();
     Widget buildMessage(Message message) => ListTile(
           title: Text(
             message.title,
@@ -305,6 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20.0),
               child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
                 color: CustomColors.front,
                 height: MediaQuery.of(context).size.height / 2,
                 child: ListView(
