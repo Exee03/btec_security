@@ -1,7 +1,6 @@
 import 'package:btec_security/data.dart';
 import 'package:btec_security/repository/status_stream.dart';
 import 'package:btec_security/utils/custom_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class HistoryScreen extends StatefulWidget {
