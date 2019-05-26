@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:btec_security/auth/bloc.dart';
-import 'package:btec_security/user_repo.dart';
+import 'package:btec_security/repository/user_repo.dart';
 import 'package:meta/meta.dart';
 
 class AuthenticationBloc
