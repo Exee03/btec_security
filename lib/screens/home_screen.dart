@@ -1,6 +1,10 @@
 import 'package:btec_security/auth/bloc.dart';
 import 'package:btec_security/data.dart';
 import 'package:btec_security/models/message.dart';
+import 'package:btec_security/models/model.dart';
+import 'package:btec_security/repository/status_repo.dart';
+import 'package:btec_security/repository/status_stream.dart';
+import 'package:btec_security/status/bloc.dart';
 import 'package:btec_security/ui/widgets/card/card_menu.dart';
 import 'package:btec_security/utils/custom_colors.dart';
 import 'package:btec_security/utils/custom_fonts.dart';
@@ -30,12 +34,18 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Message> messages = [];
   String _time =
       formatDate(DateTime.now(), [dd, '/', mm, ' - ', h, ':', nn, ' ', am]);
+  String dateNow =
+      '${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}';
+  StatusBloc _statusBloc;
+  final StatusRepository _statusRepository = StatusRepository();
 
   @override
   void initState() {
-    print(widget.user);
+    // print(widget.user);
     menu = getMenu();
     super.initState();
+    _statusBloc = StatusBloc(statusRepository: _statusRepository);
+    _statusBloc.dispatch(ListStarted(user: widget.user));
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('onMessage: $message');
@@ -73,6 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _firebaseMessaging.requestNotificationPermissions(
         const IosNotificationSettings(sound: true, badge: true, alert: true));
+  }
+
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -159,26 +174,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget homePage(context) {
-    return AnimatedPositioned(
-      duration: durationAnimation,
-      top: isCollapsed ? 0 : 0.05 * screenHeight,
-      bottom: isCollapsed ? 0 : 0.05 * screenHeight,
-      left: isCollapsed ? 0 : 0.6 * screenWidth,
-      right: isCollapsed ? 0 : -0.2 * screenWidth,
-      child: Material(
-        shadowColor: Colors.grey,
-        animationDuration: durationAnimation,
-        elevation: 8,
-        color: CustomColors.background,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          physics: ClampingScrollPhysics(),
-          child: Column(
-            children: <Widget>[
-              header(),
-              cardMenu(),
-              messageCard(),
-            ],
+    return BlocProvider(
+      bloc: _statusBloc,
+      child: AnimatedPositioned(
+        duration: durationAnimation,
+        top: isCollapsed ? 0 : 0.05 * screenHeight,
+        bottom: isCollapsed ? 0 : 0.05 * screenHeight,
+        left: isCollapsed ? 0 : 0.6 * screenWidth,
+        right: isCollapsed ? 0 : -0.2 * screenWidth,
+        child: Material(
+          shadowColor: Colors.grey,
+          animationDuration: durationAnimation,
+          elevation: 8,
+          color: CustomColors.background,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            physics: ClampingScrollPhysics(),
+            child: Column(
+              children: <Widget>[
+                header(),
+                cardMenu(),
+                messageCard(context),
+              ],
+            ),
           ),
         ),
       ),
@@ -190,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Container(
         color: CustomColors.front,
-        height: MediaQuery.of(context).size.height / 3,
+        height: MediaQuery.of(context).size.height / 2.9,
         child: Column(
           children: <Widget>[
             Padding(
@@ -221,25 +239,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Text(
-                    'BTeC',
-                    style: TextStyle(
-                        color: CustomColors.splashBackground, fontSize: 50.0),
-                  ),
-                  Text(
-                    'Security',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25.0,
-                        fontStyle: FontStyle.italic),
-                  ),
-                ],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  'BTeC',
+                  style: TextStyle(
+                      color: CustomColors.splashBackground, fontSize: 50.0),
+                ),
+                Text(
+                  'Security',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25.0,
+                      fontStyle: FontStyle.italic),
+                ),
+              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -278,25 +294,15 @@ class _HomeScreenState extends State<HomeScreen> {
           viewportFraction: 0.6,
           scale: 0.6,
           loop: true,
-          itemBuilder: (context, index) => MenuCard(index, menu[index]),
+          itemBuilder: (context, index) =>
+              MenuCard(index, menu[index], widget.user.uid),
           pagination: new SwiperPagination(),
         ),
       ),
     );
   }
 
-  Padding messageCard() {
-    messages = messages.reversed.toList();
-    Widget buildMessage(Message message) => ListTile(
-          title: Text(
-            message.title,
-            style: TextStyle(color: Colors.white),
-          ),
-          subtitle: Text(
-            message.body,
-            style: TextStyle(color: Colors.white),
-          ),
-        );
+  Padding messageCard(context) {
     return Padding(
       padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
       child: Stack(
@@ -306,11 +312,23 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20.0),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
                 color: CustomColors.front,
                 height: MediaQuery.of(context).size.height / 2,
-                child: ListView(
-                  children: messages.map(buildMessage).toList(),
+                child: BlocBuilder(
+                  bloc: _statusBloc,
+                  builder: (BuildContext context, StatusState state) {
+                    if (state is InitialStatusState) {
+                      return Center(child: Text("Stating..."));
+                    } else if (state is StatusLoading) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is StatusEmpty) {
+                      return Center(child: Text("Empty..."));
+                    } else {
+                      return StatusStream(uid: widget.user.uid);
+                    }
+                  },
                 ),
               ),
             ),
@@ -323,4 +341,105 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  // Padding messageCard(context) {
+  //   Widget buildStatusList(List<Status> listStatus) => ListView.separated(
+  //     itemBuilder: (BuildContext context, index) {
+  //       Status status = listStatus[index];
+  //       return ListTile(
+  //         leading: Text(status.time),
+  //         title: Text(status.status),
+  //         subtitle: Text(status.detail),
+  //       );
+  //     },
+  //     separatorBuilder: (BuildContext context, index) {
+  //       return Divider(
+  //         height: 8.0,
+  //         color: Colors.transparent,
+  //       );
+  //     },
+  //     itemCount: listStatus.length,
+  //   );
+  //   return Padding(
+  //     padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+  //     child: Stack(
+  //       children: <Widget>[
+  //         Padding(
+  //           padding: const EdgeInsets.symmetric(horizontal: 20.0),
+  //           child: ClipRRect(
+  //             borderRadius: BorderRadius.circular(20.0),
+  //             child: Container(
+  //               padding: EdgeInsets.symmetric(horizontal: 20.0),
+  //               color: CustomColors.front,
+  //               height: MediaQuery.of(context).size.height / 2,
+  //               child: BlocBuilder(
+  //                 bloc: _statusBloc,
+  //                 builder: (BuildContext context, StatusState state) {
+  //                   if (state is InitialStatusState) {
+  //                     return Center(child: Text("Stating..."));
+  //                   } else if (state is StatusLoading) {
+  //                     return Center(
+  //                       child: CircularProgressIndicator(),
+  //                     );
+  //                   } else if(state is StatusEmpty){
+  //                     return Center(child: Text("Empty..."));
+  //                   }
+  //                    else {
+  //                     final stateAsStatusFetchedState = state as StatusLoaded;
+  //                     final status = stateAsStatusFetchedState.status;
+  //                     return buildStatusList(status);
+  //                   }
+  //                 },
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //         Container(
+  //           color: Colors.transparent,
+  //           height: MediaQuery.of(context).size.height / 2,
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // Padding messageCard() {
+  //   messages = messages.toList();
+  //   Widget buildMessage(Message message) => ListTile(
+  //         title: Text(
+  //           message.title,
+  //           style: TextStyle(color: Colors.white),
+  //         ),
+  //         subtitle: Text(
+  //           message.body,
+  //           style: TextStyle(color: Colors.white),
+  //         ),
+  //       );
+  //   return Padding(
+  //     padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+  //     child: Stack(
+  //       children: <Widget>[
+  //         Padding(
+  //           padding: const EdgeInsets.symmetric(horizontal: 20.0),
+  //           child: ClipRRect(
+  //             borderRadius: BorderRadius.circular(20.0),
+  //             child: Container(
+  //               padding: EdgeInsets.symmetric(horizontal: 20.0),
+  //               color: CustomColors.front,
+  //               height: MediaQuery.of(context).size.height / 2,
+  //               child: ListView(
+  //                 children: messages.map(buildMessage).toList(),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //         Container(
+  //           color: Colors.transparent,
+  //           height: MediaQuery.of(context).size.height / 2,
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
+
 }
