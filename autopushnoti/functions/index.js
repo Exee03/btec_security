@@ -117,7 +117,7 @@ function saveFirestore(data, dateMonthYear, hourMinute) {
 
     const newData = {
         status: data.status,
-        name: data.name,
+        detail: 'An unknown person attempts to enter your office ( ' + data.name + ' )',
         time: hourMinute
     }
 
