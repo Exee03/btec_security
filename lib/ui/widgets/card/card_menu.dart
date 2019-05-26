@@ -5,9 +5,10 @@ import 'package:btec_security/screens/office_screen.dart';
 import 'package:flutter/material.dart';
 
 class MenuCard extends StatelessWidget {
-  MenuCard(this.index, this.menu);
+  MenuCard(this.index, this.menu, this.uid);
   final int index;
   final Menu menu;
+  final String uid;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -42,7 +43,7 @@ class MenuCard extends StatelessWidget {
                         } else if (index == 2) {
                           return Opacity(
                             opacity: animation.value,
-                            child: HistoryScreen(menu: menu),
+                            child: HistoryScreen(menu: menu, uid:uid),
                           );
                         }
                       },
