@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:btec_security/auth/bloc.dart';
-import 'package:btec_security/user_repo.dart';
+import 'package:btec_security/repository/user_repo.dart';
 import 'package:btec_security/screens/home_screen.dart';
 import 'package:btec_security/login/login_screen.dart';
 import 'package:btec_security/splash.dart';
@@ -37,7 +37,7 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<AuthenticationBloc>(
       bloc: _authenticationBloc,
       child: MaterialApp(
         theme: _themeData,
