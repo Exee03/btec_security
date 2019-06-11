@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:random_color/random_color.dart';
 
 class CustomColors{
   static Color background = Color.fromRGBO(28, 29, 50, 1);
@@ -10,4 +11,13 @@ class CustomColors{
   static Color history = Color.fromRGBO(0, 155, 113, 1);
   static Color present = Color.fromRGBO(135, 203, 84, 1);
   static Color absent = Color.fromRGBO(237, 73, 78, 1);
+}
+
+class CustomRandomColor {
+  Color next(index) {
+    RandomColor _randomColor = RandomColor(index + 5);
+    Color color =
+        _randomColor.randomColor(colorBrightness: ColorBrightness.light);
+    return color;
+  }
 }
