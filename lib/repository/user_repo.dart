@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:btec_security/utils/firebase_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -22,7 +23,14 @@ class UserRepository {
     );
     await _firebaseAuth.signInWithCredential(credential);
     FirebaseUser firebaseUser = await _firebaseAuth.currentUser();
-    updateUserData(firebaseUser);
+    bool adminAuth = await getAuth(firebaseUser.email);
+    if (adminAuth == false) {
+      await _firebaseAuth.signOut();
+      await _googleSignIn.signOut();
+      await firebaseUser.delete();
+      await googleUser.clearAuthCache();
+      return null;
+    }
     return firebaseUser;
   }
 
@@ -31,6 +39,12 @@ class UserRepository {
       email: email,
       password: password,
     );
+    bool adminAuth = await getAuth(firebaseUser.email);
+    if (adminAuth == false) {
+      await _firebaseAuth.signOut();
+      await firebaseUser.delete();
+      return null;
+    }
     updateUserData(firebaseUser);
     return firebaseUser;
   }
@@ -41,6 +55,12 @@ class UserRepository {
       email: email,
       password: password,
     );
+    bool adminAuth = await getAuth(firebaseUser.email);
+    if (adminAuth == false) {
+      await _firebaseAuth.signOut();
+      await firebaseUser.delete();
+      return null;
+    }
     updateUserData(firebaseUser);
     return firebaseUser;
   }
