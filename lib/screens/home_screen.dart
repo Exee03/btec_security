@@ -1,24 +1,25 @@
 import 'package:btec_security/auth/bloc.dart';
 import 'package:btec_security/data.dart';
-import 'package:btec_security/models/message.dart';
-import 'package:btec_security/models/model.dart';
 import 'package:btec_security/repository/status_repo.dart';
-import 'package:btec_security/repository/status_stream.dart';
+import 'package:btec_security/screens/message.dart';
+import 'package:btec_security/screens/add_details.dart';
+import 'package:btec_security/ui/widgets/stream/status_stream.dart';
 import 'package:btec_security/status/bloc.dart';
 import 'package:btec_security/ui/widgets/card/card_menu.dart';
 import 'package:btec_security/utils/custom_colors.dart';
 import 'package:btec_security/utils/custom_fonts.dart';
-import 'package:date_format/date_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends StatefulWidget {
   final FirebaseUser user;
+  final String company;
 
-  HomeScreen({Key key, @required this.user}) : super(key: key);
+  HomeScreen({Key key, @required this.user, this.company}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -31,9 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
   double screenWidth, screenHeight;
   bool isCollapsed = true;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  List<Message> messages = [];
-  String _time =
-      formatDate(DateTime.now(), [dd, '/', mm, ' - ', h, ':', nn, ' ', am]);
   String dateNow =
       '${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}';
   StatusBloc _statusBloc;
@@ -41,48 +39,119 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // print(widget.user);
     menu = getMenu();
     super.initState();
     _statusBloc = StatusBloc(statusRepository: _statusRepository);
     _statusBloc.dispatch(ListStarted(user: widget.user));
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print('onMessage: $message');
-        final notification = message['notification'];
-        setState(() {
-          messages.add(Message(
-              title: notification['title'],
-              body: '$_time\n${notification['body']}'));
-        });
+        _dialog(message['data']);
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print('onLaunch: $message');
-        setState(() {
-          messages.add(Message(
-            title: 'onLaunch',
-            body: '$message',
-          ));
-        });
-        final notification = message['data'];
-        setState(() {
-          messages.add(Message(
-              title: 'onLaunch : ${notification['title']}',
-              body: 'onLaunch : ${notification['body']}'));
-        });
+        _dialog(message['data']);
       },
       onResume: (Map<String, dynamic> message) async {
-        print('onResume: $message');
-        final notification = message['data'];
-        setState(() {
-          messages.add(Message(
-              title: 'onResume : ${notification['title']}',
-              body: 'onResume : ${notification['body']}'));
-        });
+        _dialog(message['data']);
       },
     );
     _firebaseMessaging.requestNotificationPermissions(
         const IosNotificationSettings(sound: true, badge: true, alert: true));
+  }
+
+  _dialog(notification) {
+    print(notification['body']);
+    showDialog(
+      context: context,
+      builder: (_) => new AlertDialog(
+            backgroundColor: Theme.of(context).bottomAppBarColor,
+            title: Text(notification['title'],
+                style: TextStyle(
+                    fontSize: 20, color: Theme.of(context).primaryColor)),
+            content: Container(
+              height: 250,
+              child: Column(
+                children: <Widget>[
+                  new Image(
+                    image: new CachedNetworkImageProvider(notification['url']),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Did you recognize?',
+                    style: CustomFonts.invTextStyle,
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              RaisedButton(
+                color: Colors.white30,
+                child: Text('Yes'),
+                onPressed: () => Navigator.of(context).push(
+                      PageRouteBuilder<Null>(
+                        pageBuilder: (
+                          BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                        ) {
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (
+                              BuildContext context,
+                              Widget child,
+                            ) {
+                              return Opacity(
+                                opacity: animation.value,
+                                child: DetailsEvent(
+                                  context: context,
+                                  user: widget.user,
+                                  time: notification['time'],
+                                  date: notification['date'],
+                                  titleOld: notification['title'],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        transitionDuration: Duration(milliseconds: 500),
+                      ),
+                    ),
+              ),
+              RaisedButton(
+                color: Colors.white30,
+                child: Text('No'),
+                onPressed: () => Navigator.of(context).push(
+                      PageRouteBuilder<Null>(
+                        pageBuilder: (
+                          BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                        ) {
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (
+                              BuildContext context,
+                              Widget child,
+                            ) {
+                              return Opacity(
+                                opacity: animation.value,
+                                child: SendSms(uid: widget.user.uid),
+                              );
+                            },
+                          );
+                        },
+                        transitionDuration: Duration(milliseconds: 500),
+                      ),
+                    ),
+              )
+            ],
+          ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _statusBloc.dispose();
+    super.dispose();
   }
 
   @override
@@ -100,43 +169,27 @@ class _HomeScreenState extends State<HomeScreen> {
     Size size = MediaQuery.of(context).size;
     screenHeight = size.height;
     screenWidth = size.width;
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          sideMenu(context),
-          homePage(context),
-        ],
-      ),
-    );
-  }
-
-  Widget sideMenu(context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 18.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              displayName,
-              style: CustomFonts.invTextStyle,
-            ),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  isCollapsed = true;
-                });
-              },
-              child: Text(
-                'Dashboard',
-                style: TextStyle(fontSize: 20, color: Colors.white),
+    return BlocProvider(
+      bloc: _statusBloc,
+      child: Material(
+        shadowColor: Colors.grey,
+        animationDuration: durationAnimation,
+        elevation: 8,
+        color: CustomColors.background,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          physics: ClampingScrollPhysics(),
+          child: Column(
+            children: <Widget>[
+              header(),
+              SizedBox(
+                height: 5,
+                child: Container(color: Theme.of(context).primaryColor),
               ),
-            ),
-            logoutButton(),
-          ],
+              cardMenu(),
+              messageCard(context),
+            ],
+          ),
         ),
       ),
     );
@@ -173,129 +226,69 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget homePage(context) {
-    return BlocProvider(
-      bloc: _statusBloc,
-      child: AnimatedPositioned(
-        duration: durationAnimation,
-        top: isCollapsed ? 0 : 0.05 * screenHeight,
-        bottom: isCollapsed ? 0 : 0.05 * screenHeight,
-        left: isCollapsed ? 0 : 0.6 * screenWidth,
-        right: isCollapsed ? 0 : -0.2 * screenWidth,
-        child: Material(
-          shadowColor: Colors.grey,
-          animationDuration: durationAnimation,
-          elevation: 8,
-          color: CustomColors.background,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            physics: ClampingScrollPhysics(),
-            child: Column(
-              children: <Widget>[
-                header(),
-                cardMenu(),
-                messageCard(context),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Padding header() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Container(
-        color: CustomColors.front,
-        height: MediaQuery.of(context).size.height / 2.9,
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 30.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  IconButton(
-                    iconSize: 30,
-                    icon: Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        isCollapsed = !isCollapsed;
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.search,
-                      color: Colors.white,
-                    ),
-                    onPressed: null,
-                  ),
-                ],
+  Container header() {
+    return Container(
+      color: CustomColors.front,
+      height: MediaQuery.of(context).size.height / 4.5,
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                'BTeC',
+                style: TextStyle(
+                    color: CustomColors.splashBackground, fontSize: 50.0),
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  'BTeC',
-                  style: TextStyle(
-                      color: CustomColors.splashBackground, fontSize: 50.0),
-                ),
-                Text(
-                  'Security',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25.0,
-                      fontStyle: FontStyle.italic),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Syok Sdn. Bhd.',
-                  style: TextStyle(color: Colors.white70, fontSize: 20.0),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  displayName,
-                  style: TextStyle(color: Colors.white30, fontSize: 15.0),
-                ),
-              ],
-            )
-          ],
-        ),
+              Text(
+                'Security',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25.0,
+                    fontStyle: FontStyle.italic),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                widget.company,
+                style: TextStyle(color: Colors.white70, fontSize: 20.0),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                displayName,
+                style: TextStyle(color: Colors.white30, fontSize: 15.0),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
 
   Padding cardMenu() {
+    int menuLength = menu.length - 1;
     return Padding(
-      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+      padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: Container(
         color: CustomColors.front,
         width: screenWidth,
         height: screenHeight / 2,
         child: Swiper(
           scrollDirection: Axis.horizontal,
-          itemCount: menu.length,
+          itemCount: menuLength,
           viewportFraction: 0.6,
           scale: 0.6,
           loop: true,
           itemBuilder: (context, index) =>
-              MenuCard(index, menu[index], widget.user.uid),
+              MenuCard(index, menu[index], widget.user),
           pagination: new SwiperPagination(),
         ),
       ),
@@ -312,21 +305,29 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20.0),
               child: Container(
+                padding: EdgeInsets.symmetric(vertical: 10),
                 color: CustomColors.front,
                 height: MediaQuery.of(context).size.height / 2,
                 child: BlocBuilder(
                   bloc: _statusBloc,
                   builder: (BuildContext context, StatusState state) {
                     if (state is InitialStatusState) {
-                      return Center(child: Text("Stating..."));
+                      return Center(
+                          child: Text("Stating...",
+                              style: CustomFonts.logBigText));
                     } else if (state is StatusLoading) {
                       return Center(
                         child: CircularProgressIndicator(),
                       );
                     } else if (state is StatusEmpty) {
-                      return Center(child: Text("Empty..."));
-                    } else {
-                      return StatusStream(uid: widget.user.uid);
+                      return Center(
+                          child:
+                              Text("Empty...", style: CustomFonts.logBigText));
+                    } else if (state is StatusLoaded) {
+                      return StatusStream(
+                        uid: widget.user.uid,
+                        date: dateNow,
+                      );
                     }
                   },
                 ),
@@ -341,105 +342,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // Padding messageCard(context) {
-  //   Widget buildStatusList(List<Status> listStatus) => ListView.separated(
-  //     itemBuilder: (BuildContext context, index) {
-  //       Status status = listStatus[index];
-  //       return ListTile(
-  //         leading: Text(status.time),
-  //         title: Text(status.status),
-  //         subtitle: Text(status.detail),
-  //       );
-  //     },
-  //     separatorBuilder: (BuildContext context, index) {
-  //       return Divider(
-  //         height: 8.0,
-  //         color: Colors.transparent,
-  //       );
-  //     },
-  //     itemCount: listStatus.length,
-  //   );
-  //   return Padding(
-  //     padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-  //     child: Stack(
-  //       children: <Widget>[
-  //         Padding(
-  //           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-  //           child: ClipRRect(
-  //             borderRadius: BorderRadius.circular(20.0),
-  //             child: Container(
-  //               padding: EdgeInsets.symmetric(horizontal: 20.0),
-  //               color: CustomColors.front,
-  //               height: MediaQuery.of(context).size.height / 2,
-  //               child: BlocBuilder(
-  //                 bloc: _statusBloc,
-  //                 builder: (BuildContext context, StatusState state) {
-  //                   if (state is InitialStatusState) {
-  //                     return Center(child: Text("Stating..."));
-  //                   } else if (state is StatusLoading) {
-  //                     return Center(
-  //                       child: CircularProgressIndicator(),
-  //                     );
-  //                   } else if(state is StatusEmpty){
-  //                     return Center(child: Text("Empty..."));
-  //                   }
-  //                    else {
-  //                     final stateAsStatusFetchedState = state as StatusLoaded;
-  //                     final status = stateAsStatusFetchedState.status;
-  //                     return buildStatusList(status);
-  //                   }
-  //                 },
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //         Container(
-  //           color: Colors.transparent,
-  //           height: MediaQuery.of(context).size.height / 2,
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Padding messageCard() {
-  //   messages = messages.toList();
-  //   Widget buildMessage(Message message) => ListTile(
-  //         title: Text(
-  //           message.title,
-  //           style: TextStyle(color: Colors.white),
-  //         ),
-  //         subtitle: Text(
-  //           message.body,
-  //           style: TextStyle(color: Colors.white),
-  //         ),
-  //       );
-  //   return Padding(
-  //     padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-  //     child: Stack(
-  //       children: <Widget>[
-  //         Padding(
-  //           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-  //           child: ClipRRect(
-  //             borderRadius: BorderRadius.circular(20.0),
-  //             child: Container(
-  //               padding: EdgeInsets.symmetric(horizontal: 20.0),
-  //               color: CustomColors.front,
-  //               height: MediaQuery.of(context).size.height / 2,
-  //               child: ListView(
-  //                 children: messages.map(buildMessage).toList(),
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //         Container(
-  //           color: Colors.transparent,
-  //           height: MediaQuery.of(context).size.height / 2,
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
-
 }
