@@ -30,88 +30,112 @@ class _RegisterFormState extends State<RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener(
-      bloc: _registerBloc,
-      listener: (BuildContext context, RegisterState state) {
-        if (state.isSubmitting) {
-          Scaffold.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Registering...'),
-                    CircularProgressIndicator(),
-                  ],
-                ),
-              ),
-            );
-        }
-        if (state.isSuccess) {
-          BlocProvider.of<AuthenticationBloc>(context).dispatch(LoggedIn());
-          Navigator.of(context).pop();
-        }
-        if (state.isFailure) {
-          Scaffold.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Registration Failure'),
-                    Icon(Icons.error),
-                  ],
-                ),
-                backgroundColor: Colors.red,
-              ),
-            );
-        }
-      },
-      child: BlocBuilder(
+    return new Theme(
+      data: new ThemeData(
+        hintColor: Colors.white30,
+        cursorColor: Theme.of(context).primaryColor,
+        primaryColor: Theme.of(context).primaryColor,
+      ),
+      child: BlocListener(
         bloc: _registerBloc,
-        builder: (BuildContext context, RegisterState state) {
-          return Padding(
-            padding: EdgeInsets.all(20),
-            child: Form(
-              child: ListView(
-                children: <Widget>[
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.email),
-                      labelText: 'Email',
-                    ),
-                    autocorrect: false,
-                    autovalidate: true,
-                    validator: (_) {
-                      return !state.isEmailValid ? 'Invalid Email' : null;
-                    },
+        listener: (BuildContext context, RegisterState state) {
+          if (state.isSubmitting) {
+            Scaffold.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Registering...',
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Theme.of(context).primaryColor),
+                      ),
+                      CircularProgressIndicator(),
+                    ],
                   ),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.lock),
-                      labelText: 'Password',
-                    ),
-                    obscureText: true,
-                    autocorrect: false,
-                    autovalidate: true,
-                    validator: (_) {
-                      return !state.isPasswordValid ? 'Invalid Password' : null;
-                    },
+                ),
+              );
+          }
+          if (state.isSuccess) {
+            BlocProvider.of<AuthenticationBloc>(context).dispatch(LoggedIn());
+            Navigator.of(context).pop();
+          }
+          if (state.isFailure) {
+            Scaffold.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Registration Failure',
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.black),
+                      ),
+                      Icon(Icons.error),
+                    ],
                   ),
-                  RegisterButton(
-                    onPressed: isRegisterButtonEnabled(state)
-                        ? _onFormSubmitted
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-          );
+                  backgroundColor: Colors.red,
+                ),
+              );
+          }
         },
+        child: BlocBuilder(
+          bloc: _registerBloc,
+          builder: (BuildContext context, RegisterState state) {
+            return Padding(
+              padding: EdgeInsets.all(20),
+              child: Form(
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(height: 30),
+                    TextFormField(
+                      controller: _emailController,
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.email),
+                        labelText: 'Email',
+                      ),
+                      autocorrect: false,
+                      autovalidate: true,
+                      validator: (_) {
+                        return !state.isEmailValid ? 'Invalid Email' : null;
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: _passwordController,
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.lock),
+                        labelText: 'Password',
+                      ),
+                      obscureText: true,
+                      autocorrect: false,
+                      autovalidate: true,
+                      validator: (_) {
+                        return !state.isPasswordValid
+                            ? 'Invalid Password'
+                            : null;
+                      },
+                    ),
+                    SizedBox(height: 30),
+                    RegisterButton(
+                      onPressed: isRegisterButtonEnabled(state)
+                          ? _onFormSubmitted
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
