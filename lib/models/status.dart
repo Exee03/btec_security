@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 
 @immutable
 class Status {
-  final String status;
+  final String title;
   final String time;
   final String detail;
   const Status({
-    @required this.status,
+    @required this.title,
     @required this.time,
     @required this.detail
   });
 
   Status.fromMap(DocumentSnapshot data)
       : this(
-          status: data['status'],
+          title: data['title'],
           time: data['time'],
           detail: data['detail'],
         );
