@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:btec_security/auth/bloc.dart';
 import 'package:btec_security/repository/user_repo.dart';
+import 'package:btec_security/utils/firebase_api.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 
 class AuthenticationBloc
@@ -32,8 +34,10 @@ class AuthenticationBloc
     try {
       final isSignedIn = await _userRepository.isSignedIn();
       if (isSignedIn) {
-        final name = await _userRepository.getUser();
-        yield Authenticated(name);
+        final FirebaseUser name = await _userRepository.getUser();
+        final Company company = await getCompany(name.email, name.uid);
+
+        yield Authenticated(name, company.company, company.totalEmployees);
       } else {
         yield Unauthenticated();
       }
@@ -43,7 +47,9 @@ class AuthenticationBloc
   }
 
   Stream<AuthenticationState> _mapLoggedInToState() async* {
-    yield Authenticated(await _userRepository.getUser());
+    final FirebaseUser name = await _userRepository.getUser();
+    final Company company = await getCompany(name.email, name.uid);
+    yield Authenticated(name, company.company, company.totalEmployees);
   }
 
   Stream<AuthenticationState> _mapLoggedOutToState() async* {

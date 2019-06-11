@@ -14,8 +14,10 @@ class Uninitialized extends AuthenticationState {
 
 class Authenticated extends AuthenticationState {
   final FirebaseUser user;
+  final String company;
+  final int totalEmployee;
 
-  Authenticated(this.user) : super([user]);
+  Authenticated(this.user, this.company, this.totalEmployee) : super([user,company,totalEmployee]);
 
   @override
   String toString() => 'Authenticated { displayName: ${user.displayName} }';
