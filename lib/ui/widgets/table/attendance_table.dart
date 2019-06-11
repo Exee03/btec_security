@@ -1,112 +1,58 @@
-import 'package:date_format/date_format.dart';
+import 'package:btec_security/models/model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class AttendanceModel {
-  final DateTime time;
-  final String studentId;
-  final String studentName;
-  const AttendanceModel({this.time, this.studentId, this.studentName});
-}
-
 var attendance = <AttendanceModel>[
-  AttendanceModel(time: DateTime.now(), studentId: '0', studentName: 'aaa')
+  AttendanceModel(time: DateTime.now().toString(), name: 'aaa')
 ];
 
 class AttendanceTable extends StatefulWidget {
+  AttendanceTable({this.data, this.colors, this.index});
+  final DocumentSnapshot data;
+  final Color colors;
+  final int index;
   @override
   _AttendanceTableState createState() => _AttendanceTableState();
 }
 
 class _AttendanceTableState extends State<AttendanceTable> {
-  Future loadData() async {
-    attendance.add(AttendanceModel(
-        time: DateTime.now(), studentId: '2', studentName: 'asdasdsadasd'));
-    attendance.add(AttendanceModel(
-        time: DateTime.now(), studentId: '3', studentName: 'cvbvcbcvbvbcvb'));
-  }
+  DateTime date = DateTime.now();
+  String dateNow;
 
-  Widget bodyData() => DataTable(
-        columns: <DataColumn>[
-          DataColumn(
-              label: Row(children: <Widget>[
-            Container(
-                width: 60,
+  Widget bodyData(AttendanceModel attendances) => Row(
+        children: <Widget>[
+          Expanded(
+            flex: 1,
+            child: Container(
                 child: Text(
-                  'Time',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white),
-                )),
-            Container(
-                width: 90,
-                child: Text(
-                  'StudentID',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white),
-                )),
-            Container(
-                width: 120,
-                child: Text(
-                  'Name',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white),
-                ))
-          ])),
+              attendances.time,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            )),
+          ),
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Text(
+                attendances.name,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.clip,
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          )
         ],
-        rows: attendance
-            .map((data) => DataRow(
-                  cells: [
-                    DataCell(Row(
-                      children: <Widget>[
-                        Container(
-                            width: 60,
-                            child: Text(
-                              formatDate(data.time, [h, ':', nn, ' ', am]),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white),
-                            )),
-                        Container(
-                            width: 90,
-                            child: Text(
-                              data.studentId,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white),
-                            )),
-                        Container(
-                            width: 150,
-                            child: Text(
-                              data.studentName,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.clip,
-                              style: TextStyle(color: Colors.white),
-                            ))
-                      ],
-                    )),
-                  ],
-                ))
-            .toList(),
       );
 
   @override
   void initState() {
     super.initState();
     attendance.clear();
-    loadData();
+    dateNow = '${date.day}-${date.month}-${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
-    if (attendance.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-            child: Text(
-          'No data in this Class',
-        )),
-      );
-    }
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: bodyData(),
-    );
+    return bodyData(AttendanceModel.fromMap(widget.data, widget.index));
   }
 }
