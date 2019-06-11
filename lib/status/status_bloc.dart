@@ -33,22 +33,3 @@ class StatusBloc extends Bloc<StatusEvent, StatusState> {
     }
   }
 }
-
-// @override
-//   Stream<StatusState> mapEventToState(StatusEvent event) async* {
-//     print("mapEventToState");
-//     yield StatusLoading();
-//     try {
-//       List<Status> listStatus;
-//       if (event is ListStarted) {
-//         listStatus = await statusRepository.fetchStatusByDay(event.user.uid);
-//       }
-//       if (listStatus.length == 0) {
-//         yield StatusEmpty();
-//       } else {
-//         yield StatusLoaded(status: listStatus);
-//       }
-//     } catch (_) {
-//       yield StatusError();
-//     }
-//   }
