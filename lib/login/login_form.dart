@@ -1,6 +1,5 @@
 import 'package:btec_security/auth/bloc.dart';
 import 'package:btec_security/repository/user_repo.dart';
-import 'package:btec_security/utils/custom_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:btec_security/login/login.dart';
@@ -51,7 +50,14 @@ class _LoginFormState extends State<LoginForm> {
               SnackBar(
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('Login Failure',style: CustomFonts.invTextStyle,), Icon(Icons.error)],
+                  children: [
+                    Text(
+                      'Login fail !\nYour email is unregistered in this system.\nPlease contact BTeC for more infomation.',
+                      style: TextStyle(color: Colors.black),
+                      overflow: TextOverflow.clip,
+                    ),
+                    Icon(Icons.error)
+                  ],
                 ),
                 backgroundColor: Colors.red,
               ),
@@ -65,7 +71,11 @@ class _LoginFormState extends State<LoginForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Logging In...',style: CustomFonts.invTextStyle,),
+                    Text(
+                      'Logging In...',
+                      style: TextStyle(
+                          fontSize: 20, color: Theme.of(context).primaryColor),
+                    ),
                     CircularProgressIndicator(),
                   ],
                 ),
@@ -85,8 +95,10 @@ class _LoginFormState extends State<LoginForm> {
               child: ListView(
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20,horizontal: 50),
-                    child: Container(child: Image.asset('assets/icons/app_logo.png', height: 180)),
+                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 50),
+                    child: Container(
+                        child: Image.asset('assets/icons/app_logo.png',
+                            height: 180)),
                   ),
                   TextFormField(
                     controller: _emailController,
