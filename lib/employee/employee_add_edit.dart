@@ -210,7 +210,7 @@ class _EmployeeAddEditState extends State<EmployeeAddEdit> {
                                 Text(
                                   'Adding new employee fail !\n$onError',
                                   style: TextStyle(
-                                      color: Theme.of(context).primaryColor),
+                                      color: Colors.black),
                                   overflow: TextOverflow.clip,
                                 ),
                                 Icon(Icons.error)
