@@ -5,7 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SendSms extends StatefulWidget {
   final String uid;
-  SendSms({this.uid});
+  final String state;
+  final String address;
+  SendSms({this.uid, this.state, this.address});
   @override
   _SendSmsState createState() => new _SendSmsState();
 }
@@ -15,10 +17,14 @@ class _SendSmsState extends State<SendSms> {
   Future<Null> sendingSms() async {
     print("SendSMS");
     try {
-      final String result = await sendSms(widget.uid);
-      print(result);
+      Map<String,String> container = {
+        'uid': widget.uid,
+        'state': widget.state,
+        'address': widget.address,
+      };
+      await sendSms(container);
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
   }
 
