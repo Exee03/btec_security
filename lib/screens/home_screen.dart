@@ -134,7 +134,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             ) {
                               return Opacity(
                                 opacity: animation.value,
-                                child: SendSms(uid: widget.user.uid),
+                                child: SendSms(
+                                  uid: widget.user.uid,
+                                  state: notification['state'],
+                                  address: notification['address'],
+                                ),
                               );
                             },
                           );
