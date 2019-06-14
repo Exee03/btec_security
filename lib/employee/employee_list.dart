@@ -127,7 +127,7 @@ class _EmployeeListState extends State<EmployeeList> {
                                     snapshot.data.documents[index];
                                 Employee employee =
                                     Employee.fromMap(documentSnapshot, index);
-                                    print(employee.profileUrl);
+                                print(employee.profileUrl);
                                 return InkWell(
                                   onTap: () => Navigator.of(context).push(
                                         PageRouteBuilder<Null>(
@@ -187,17 +187,8 @@ class _EmployeeListState extends State<EmployeeList> {
                                         'name': employee.name,
                                       };
                                       if (snapshot.data.documents.length == 1) {
-                                        await deleteEmployee(container);
-                                        _scaffoldKey.currentState
-                                            .showSnackBar(SnackBar(
-                                                content: Text(
-                                          "${employee.name} is deleted!",
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Theme.of(context)
-                                                  .primaryColor),
-                                        )));
-                                        Navigator.of(context);
+                                        deleteEmployee(container);
+                                        Navigator.pop(context);
                                       } else {
                                         await deleteEmployee(container);
                                         _scaffoldKey.currentState
