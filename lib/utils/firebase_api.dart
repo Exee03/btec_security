@@ -64,15 +64,17 @@ Future getCompany(String email, String uid) async {
   return user;
 }
 
-Future sendSms(String uid) {
-  print('sendSms');
+Future sendSms(Map<String, String> container) {
+  print('sendSms : ${container.length}');
   return post('https://us-central1-btec-e4bef.cloudfunctions.net/sendSms',
-      body: {'uid': uid}).catchError((onError) => print('error!!! : $onError'));
+          body: container)
+      .catchError((onError) => print('error!!! : $onError'));
 }
 
 Future addDetailsEvent(Map<String, String> container) {
   print('addDetailsEvent : ${container.length}');
-  return post('https://us-central1-btec-e4bef.cloudfunctions.net/addDetailsEvent',
+  return post(
+          'https://us-central1-btec-e4bef.cloudfunctions.net/addDetailsEvent',
           body: container)
       .catchError((onError) => print('error!!! : $onError'));
 }
