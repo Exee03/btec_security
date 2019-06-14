@@ -6,6 +6,7 @@ import 'package:btec_security/screens/sidemenu/profile_sidemenu.dart';
 import 'package:btec_security/utils/custom_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:btec_security/auth/bloc.dart';
 import 'package:btec_security/repository/user_repo.dart';
@@ -19,7 +20,10 @@ import 'package:hidden_drawer_menu/menu/item_hidden_menu.dart';
 
 main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
-  runApp(App());
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new App());
+  });
 }
 
 class App extends StatefulWidget {
@@ -53,6 +57,7 @@ class _AppState extends State<App> {
     return BlocProvider<AuthenticationBloc>(
       bloc: _authenticationBloc,
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: _themeData,
         home: BlocBuilder(
           bloc: _authenticationBloc,
