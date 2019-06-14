@@ -71,7 +71,6 @@ flutter:
    - assets/icons/history.png
    - assets/icons/app_icon.png
    - assets/icons/app_logo.png
-   - assets/icons/avatar.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
