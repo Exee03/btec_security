@@ -91,7 +91,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: Container(
               padding: EdgeInsets.all(10),
               child: StatusStream(
-                date: _labelDate,
+                date: _selectedDate,
                 uid: widget.uid,
               ),
             ),
