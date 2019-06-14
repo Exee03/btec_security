@@ -86,34 +86,50 @@ class _EmployeeDetailState extends State<EmployeeDetail> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: widget.colors,
         child: Icon(Icons.add),
-        onPressed: () => Navigator.of(context).push(
-              PageRouteBuilder<Null>(
-                pageBuilder: (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) {
-                  return AnimatedBuilder(
-                    animation: animation,
-                    builder: (
-                      BuildContext context,
-                      Widget child,
-                    ) {
-                      return Opacity(
-                        opacity: animation.value,
-                        child: EmployeeRating(
-                            context: context,
-                            branch: widget.branch,
-                            user: widget.user,
-                            employee: widget.employee,
-                            colors: widget.colors),
-                      );
-                    },
-                  );
-                },
-                transitionDuration: Duration(milliseconds: 500),
-              ),
-            ),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => EmployeeRating(
+                    context: context,
+                    branch: widget.branch,
+                    user: widget.user,
+                    employee: widget.employee,
+                    colors: widget.colors)),
+          );
+          // Navigator.of(context).push(
+          //   PageRouteBuilder<Null>(
+          //     pageBuilder: (
+          //       BuildContext context,
+          //       Animation<double> animation,
+          //       Animation<double> secondaryAnimation,
+          //     ) {
+          //       return AnimatedBuilder(
+          //         animation: animation,
+          //         builder: (
+          //           BuildContext context,
+          //           Widget child,
+          //         ) {
+          //           return Opacity(
+          //             opacity: animation.value,
+          //             child: EmployeeRating(
+          //                 context: context,
+          //                 branch: widget.branch,
+          //                 user: widget.user,
+          //                 employee: widget.employee,
+          //                 colors: widget.colors),
+          //           );
+          //         },
+          //       );
+          //     },
+          //     transitionDuration: Duration(milliseconds: 500),
+          //   ),
+          // );
+          print(result);
+          setState(() {
+            _rating = _rating + double.parse(result);
+          });
+        },
       ),
       body: Column(
         children: <Widget>[
@@ -255,58 +271,54 @@ class _EmployeeDetailState extends State<EmployeeDetail> {
                               itemSize: 30.0,
                               emptyColor: Colors.amber.withAlpha(50),
                             ),
-                            Container(
-                              height: 100,
-                              child: StreamBuilder(
-                                  stream: Firestore.instance
-                                      .collection('employee')
-                                      .document(widget.user.uid)
-                                      .collection(widget.branch)
-                                      .where('name',
-                                          isEqualTo: widget.employee.name)
-                                      .snapshots(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                                    if (!snapshot.hasData) {
-                                      return Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    }
-                                    DocumentSnapshot documentSnapshot =
-                                        snapshot.data.documents[0];
-                                    List<dynamic> employees =
-                                        documentSnapshot['ratingDetail'];
-                                    if (employees == null) {
-                                      return Center(
-                                        child: Text('No Rating',
-                                            style: TextStyle(
-                                                color: widget.colors,
-                                                fontSize: 15)),
-                                      );
-                                    }
-                                    return ListView.separated(
-                                      itemBuilder:
-                                          (BuildContext context, index) {
-                                        no = index + 1;
-                                        return ListTile(
-                                          leading: Text(no.toString(),
-                                              style: CustomFonts.invTextStyle),
-                                          title: Text(
-                                            employees[index],
-                                            style: CustomFonts.invTextStyle,
-                                          ),
+                            Expanded(
+                              child: Container(
+                                child: StreamBuilder(
+                                    stream: Firestore.instance
+                                        .collection('employee')
+                                        .document(widget.user.uid)
+                                        .collection(widget.branch)
+                                        .where('name',
+                                            isEqualTo: widget.employee.name)
+                                        .snapshots(),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
                                         );
-                                      },
-                                      separatorBuilder:
-                                          (BuildContext context, index) {
-                                        return Divider(
-                                          height: 1.0,
-                                          color: Colors.white,
+                                      }
+                                      DocumentSnapshot documentSnapshot =
+                                          snapshot.data.documents[0];
+                                      List<dynamic> employees =
+                                          documentSnapshot['ratingDetail'];
+                                      if (employees == null) {
+                                        return Center(
+                                          child: Text('No Rating',
+                                              style: TextStyle(
+                                                  color: widget.colors,
+                                                  fontSize: 15)),
                                         );
-                                      },
-                                      itemCount: employees.length,
-                                    );
-                                  }),
+                                      }
+                                      return ListView.builder(
+                                        itemBuilder:
+                                            (BuildContext context, index) {
+                                          no = index + 1;
+                                          return ListTile(
+                                            leading: Text(no.toString(),
+                                                overflow: TextOverflow.clip,
+                                                style:
+                                                    CustomFonts.invTextStyle),
+                                            title: Text(
+                                              employees[index],
+                                              style: CustomFonts.invTextStyle,
+                                            ),
+                                          );
+                                        },
+                                        itemCount: employees.length,
+                                      );
+                                    }),
+                              ),
                             ),
                           ],
                         ),
