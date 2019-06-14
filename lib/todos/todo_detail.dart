@@ -22,8 +22,8 @@ class _TodoDetailState extends State<TodoDetail> {
   int sharedValue = 0;
 
   final Map<int, Widget> widgetTodo = const <int, Widget>{
-    0: Text('Uncomplete'),
-    1: Text('Complete'),
+    0: Text('Incomplete'),
+    1: Text('Completed'),
   };
 
   @override
