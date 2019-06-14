@@ -72,7 +72,7 @@ class _EmployeeRatingState extends State<EmployeeRating> {
           child: FloatingActionButton.extended(
             onPressed: () async {
               await _add();
-              Navigator.pop(context);
+              Navigator.pop(context, '1');
             },
             label: Icon(Icons.add),
             elevation: 5.0,
