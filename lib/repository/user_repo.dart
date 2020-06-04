@@ -14,6 +14,8 @@ class UserRepository {
         _googleSignIn = googleSignin ?? GoogleSignIn();
 
   Future<FirebaseUser> signInWithGoogle() async {
+    try {
+      
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
@@ -32,37 +34,40 @@ class UserRepository {
       return null;
     }
     return firebaseUser;
+    } catch (e) {
+    }
   }
 
   Future<void> signInWithCredentials(String email, String password) async {
-    FirebaseUser firebaseUser = await _firebaseAuth.signInWithEmailAndPassword(
+    AuthResult authResult = await _firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
-    bool adminAuth = await getAuth(firebaseUser.email);
+    
+    bool adminAuth = await getAuth(authResult.user.email);
     if (adminAuth == false) {
       await _firebaseAuth.signOut();
-      await firebaseUser.delete();
+      await authResult.user.delete();
       return null;
     }
-    updateUserData(firebaseUser);
-    return firebaseUser;
+    updateUserData(authResult.user);
+    return authResult.user;
   }
 
   Future<void> signUp({String email, String password}) async {
-    FirebaseUser firebaseUser =
+    AuthResult authResult =
         await _firebaseAuth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    bool adminAuth = await getAuth(firebaseUser.email);
+    bool adminAuth = await getAuth(authResult.user.email);
     if (adminAuth == false) {
       await _firebaseAuth.signOut();
-      await firebaseUser.delete();
+      await authResult.user.delete();
       return null;
     }
-    updateUserData(firebaseUser);
-    return firebaseUser;
+    updateUserData(authResult.user);
+    return authResult.user;
   }
 
   Future<void> signOut() async {

@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: CustomColors.splashBackground,
       body: BlocProvider<LoginBloc>(
-        bloc: _loginBloc,
+        create: (context) => _loginBloc,
         child: LoginForm(userRepository: _userRepository),
       ),
     );
@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _loginBloc.dispose();
+    _loginBloc.close();
     super.dispose();
   }
 }

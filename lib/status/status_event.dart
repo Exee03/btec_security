@@ -4,7 +4,9 @@ import 'package:equatable/equatable.dart';
 
 @immutable
 abstract class StatusEvent extends Equatable {
-  StatusEvent([List props = const []]) : super(props);
+  const StatusEvent();
+  @override
+  List<Object> get props => [];
 }
 
 class ListStarted extends StatusEvent {

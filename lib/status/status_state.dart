@@ -4,7 +4,9 @@ import 'package:equatable/equatable.dart';
 
 @immutable
 abstract class StatusState extends Equatable {
-  StatusState([List props = const []]) : super(props);
+  const StatusState();
+  @override
+  List<Object> get props => [];
 }
   
 class InitialStatusState extends StatusState {}

@@ -4,7 +4,8 @@ import 'package:meta/meta.dart';
 
 @immutable
 abstract class AuthenticationState extends Equatable {
-  AuthenticationState([List props = const []]) : super(props);
+  const AuthenticationState();
+  List<Object> get props => [];
 }
 
 class Uninitialized extends AuthenticationState {
@@ -17,7 +18,7 @@ class Authenticated extends AuthenticationState {
   final String company;
   final int totalEmployee;
 
-  Authenticated(this.user, this.company, this.totalEmployee) : super([user,company,totalEmployee]);
+  Authenticated(this.user, this.company, this.totalEmployee);
 
   @override
   String toString() => 'Authenticated { displayName: ${user.displayName} }';

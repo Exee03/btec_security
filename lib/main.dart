@@ -20,6 +20,7 @@ import 'package:hidden_drawer_menu/menu/item_hidden_menu.dart';
 
 main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(new App());
@@ -49,22 +50,19 @@ class _AppState extends State<App> {
     super.initState();
     menu = getMenu();
     _authenticationBloc = AuthenticationBloc(userRepository: _userRepository);
-    _authenticationBloc.dispatch(AppStarted());
+    _authenticationBloc.add(AppStarted());
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AuthenticationBloc>(
-      bloc: _authenticationBloc,
+      create: (context) => _authenticationBloc,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: _themeData,
         home: BlocBuilder(
           bloc: _authenticationBloc,
           builder: (BuildContext context, AuthenticationState state) {
-            if (state is Uninitialized) {
-              return SplashScreen();
-            }
             if (state is Unauthenticated) {
               return LoginScreen(userRepository: _userRepository);
             }
@@ -134,6 +132,8 @@ class _AppState extends State<App> {
                 backgroundColorAppBar: Theme.of(context).bottomAppBarColor,
                 elevationAppBar: 0,
               );
+            } else {
+              return SplashScreen();
             }
           },
         ),
@@ -143,7 +143,7 @@ class _AppState extends State<App> {
 
   @override
   void dispose() {
-    _authenticationBloc.dispose();
+    _authenticationBloc.close();
     super.dispose();
   }
 }

@@ -31,7 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(title: Text('Register')),
       body: Center(
         child: BlocProvider<RegisterBloc>(
-          bloc: _registerBloc,
+          create: (context) => _registerBloc,
           child: RegisterForm(),
         ),
       ),
@@ -40,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
-    _registerBloc.dispose();
+    _registerBloc.close();
     super.dispose();
   }
 }

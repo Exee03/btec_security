@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     menu = getMenu();
     super.initState();
     _statusBloc = StatusBloc(statusRepository: _statusRepository);
-    _statusBloc.dispatch(ListStarted(user: widget.user));
+    _statusBloc.add(ListStarted(user: widget.user));
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         _dialog(message['data']);
@@ -154,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _statusBloc.dispose();
+    _statusBloc.close();
     super.dispose();
   }
 
@@ -173,8 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Size size = MediaQuery.of(context).size;
     screenHeight = size.height;
     screenWidth = size.width;
-    return BlocProvider(
-      bloc: _statusBloc,
+    return BlocProvider<StatusBloc>(
+      create: (context) => _statusBloc,
       child: Material(
         shadowColor: Colors.grey,
         animationDuration: durationAnimation,
@@ -204,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
       child: InkWell(
         onTap: () =>
-            BlocProvider.of<AuthenticationBloc>(context).dispatch(LoggedOut()),
+            BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut()),
         child: new Container(
           width: 150.0,
           height: 50.0,

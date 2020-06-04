@@ -44,35 +44,35 @@ class _EmployeeDetailState extends State<EmployeeDetail> {
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () => Navigator.of(context).push(
-                  PageRouteBuilder<Null>(
-                    pageBuilder: (
+              PageRouteBuilder<Null>(
+                pageBuilder: (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) {
+                  return AnimatedBuilder(
+                    animation: animation,
+                    builder: (
                       BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
+                      Widget child,
                     ) {
-                      return AnimatedBuilder(
-                        animation: animation,
-                        builder: (
-                          BuildContext context,
-                          Widget child,
-                        ) {
-                          return Opacity(
-                            opacity: animation.value,
-                            child: EmployeeAddEdit(
-                              context: context,
-                              user: widget.user,
-                              employee: widget.employee,
-                              colors: widget.colors,
-                              currentProfilePic: profilePic,
-                              branch: widget.branch,
-                            ),
-                          );
-                        },
+                      return Opacity(
+                        opacity: animation.value,
+                        child: EmployeeAddEdit(
+                          context: context,
+                          user: widget.user,
+                          employee: widget.employee,
+                          colors: widget.colors,
+                          currentProfilePic: profilePic,
+                          branch: widget.branch,
+                        ),
                       );
                     },
-                    transitionDuration: Duration(milliseconds: 500),
-                  ),
-                ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 500),
+              ),
+            ),
           )
         ],
         backgroundColor: widget.colors,
@@ -265,11 +265,14 @@ class _EmployeeDetailState extends State<EmployeeDetail> {
                             SizedBox(
                               height: 10,
                             ),
-                            FlutterRatingBarIndicator(
+                            RatingBarIndicator(
                               rating: _rating,
                               itemCount: 5,
                               itemSize: 30.0,
-                              emptyColor: Colors.amber.withAlpha(50),
+                              itemBuilder: (context, index) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
                             ),
                             Expanded(
                               child: Container(

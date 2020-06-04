@@ -17,18 +17,20 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   RegisterState get initialState => RegisterState.empty();
 
   @override
-  Stream<RegisterState> transform(
+  Stream<Transition<RegisterEvent, RegisterState>> transformEvents(
     Stream<RegisterEvent> events,
-    Stream<RegisterState> Function(RegisterEvent event) next,
+    TransitionFunction<RegisterEvent, RegisterState> transitionFn,
   ) {
-    final observableStream = events as Observable<RegisterEvent>;
-    final nonDebounceStream = observableStream.where((event) {
+    final nonDebounceStream = events.where((event) {
       return (event is! EmailChanged && event is! PasswordChanged);
     });
-    final debounceStream = observableStream.where((event) {
+    final debounceStream = events.where((event) {
       return (event is EmailChanged || event is PasswordChanged);
     }).debounceTime(Duration(milliseconds: 300));
-    return super.transform(nonDebounceStream.mergeWith([debounceStream]), next);
+    return super.transformEvents(
+      nonDebounceStream.mergeWith([debounceStream]),
+      transitionFn,
+    );
   }
 
   @override
@@ -45,13 +47,13 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   }
 
   Stream<RegisterState> _mapEmailChangedToState(String email) async* {
-    yield currentState.update(
+    yield state.update(
       isEmailValid: Validators.isValidEmail(email),
     );
   }
 
   Stream<RegisterState> _mapPasswordChangedToState(String password) async* {
-    yield currentState.update(
+    yield state.update(
       isPasswordValid: Validators.isValidPassword(password),
     );
   }

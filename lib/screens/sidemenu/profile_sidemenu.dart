@@ -95,7 +95,7 @@ class _ProfileState extends State<Profile> {
             child: RaisedButton(
               color: Colors.red[800],
               onPressed: () => BlocProvider.of<AuthenticationBloc>(context)
-                  .dispatch(LoggedOut()),
+                  .add(LoggedOut()),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
